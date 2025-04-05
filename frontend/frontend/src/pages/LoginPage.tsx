@@ -21,8 +21,10 @@ const LoginPage = () => {
     }
 
     try {
+      // TODO: Отправить запрос на API аутентификации
       console.log('Отправка данных:', formData);
 
+      // Если успешный вход — перенаправляем пользователя
       router.navigate({ to: '/dashboard' });
     } catch (err) {
       setError('Ошибка входа, попробуйте снова.');
@@ -30,50 +32,35 @@ const LoginPage = () => {
   };
 
   return (
-    <Box 
-      sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh', 
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
         bgcolor: '#292626',
-        color: 'white',
       }}
     >
-      <Paper 
-        elevation={10} 
-        sx={{ 
-          padding: 4, 
-          width: 350, 
-          display: 'flex', 
-          flexDirection: 'column', 
-          gap: 2, 
-          borderRadius: 3, 
+      <Paper
+        elevation={10}
+        sx={{
+          padding: 4,
+          width: 350,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          borderRadius: 3,
           backgroundColor: '#292626',
         }}
       >
-        <Typography 
-          variant="h3" 
-          textAlign="center" 
-          fontWeight="bold" 
+        <Typography
+          variant="h4"
+          textAlign="center"
+          fontWeight="bold"
           sx={{
-            fontFamily: '"Playfair Display", serif',
-            color: '#E0E0E0',
+            fontFamily: '"Poppins", sans-serif',
+            color: '#333',
             textShadow: '1px 1px 3px rgba(0, 0, 0, 0.2)',
-            marginBottom: 2,
-          }}
-        >
-          LocOp
-        </Typography>
-
-        <Typography 
-          variant="h4" 
-          textAlign="center" 
-          fontWeight="bold" 
-          sx={{
-            fontFamily: '"Playfair Display", serif',
-            color: '#E0E0E0',
-            textShadow: '1px 1px 3px rgba(0, 0, 0, 0.2)'
           }}
         >
           Вход
@@ -81,91 +68,44 @@ const LoginPage = () => {
 
         {error && <Alert severity="error">{error}</Alert>}
 
-        <TextField 
-          label="Имя пользователя" 
+        <TextField
+          label="Имя пользователя"
           name="username"
-          variant="outlined" 
-          fullWidth 
+          variant="outlined"
+          fullWidth
           value={formData.username}
           onChange={handleChange}
-          sx={{
-            input: {
-              color: 'white',
-            },
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: '#B0B0B0',
-              },
-              '&:hover fieldset': {
-                borderColor: '#E0E0E0',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: 'transparent',
-              },
-            },
-            '& .MuiInputLabel-root': {
-              color: 'white',
-            },
-            '& .MuiInputLabel-root.Mui-focused': {
-              color: 'white',
-            },
-          }}
         />
-        <TextField 
-          label="Пароль" 
+        <TextField
+          label="Пароль"
           name="password"
-          type="password" 
-          variant="outlined" 
-          fullWidth 
+          type="password"
+          variant="outlined"
+          fullWidth
           value={formData.password}
           onChange={handleChange}
-          sx={{
-            input: {
-              color: 'white',
-            },
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: '#B0B0B0',
-              },
-              '&:hover fieldset': {
-                borderColor: '#E0E0E0',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: 'transparent',
-              },
-            },
-            '& .MuiInputLabel-root': {
-              color: 'white',
-            },
-            '& .MuiInputLabel-root.Mui-focused': {
-              color: 'white',
-            },
-          }}
         />
 
-        <Button 
-          variant="contained" 
-          fullWidth 
-          sx={{ 
-            mt: 2, 
-            backgroundColor: '#383836',
-            fontFamily: '"Playfair Display", serif',
-          }}
+        <Button
+          variant="contained"
+          color="primary"
+          fullWidth
+          sx={{ mt: 2 }}
           onClick={handleSubmit}
         >
           Войти
         </Button>
-        <Button 
-          variant="contained" 
-          fullWidth 
-          sx={{ 
-            backgroundColor: '#383836',
-            fontFamily: '"Playfair Display", serif',
-          }}
+
+        <Typography variant="body2" textAlign="center">
+          Нет аккаунта?{' '}
+          <Button
+            variant="text"
+            color="primary"
             onClick={() => router.navigate({ to: '/register' })}
           >
             Зарегистрироваться
-         </Button>
+          </Button>
+        </Typography>
       </Paper>
     </Box>
   );
