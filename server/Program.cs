@@ -2,12 +2,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using server.Services;
 using server.Data;
+using server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Добавляем сервисы для работы с JWT
+// Конфигурация JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -23,16 +23,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Добавляем сервисы для работы с зависимостями
+// Подключаем сервис AuthService
 builder.Services.AddScoped<AuthService>();
 
-// Добавляем контекст БД
+// Подключаем контекст базы данных
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddControllers();
+
 var app = builder.Build();
 
-// Настройка промежуточного ПО
 app.UseAuthentication();
 app.UseAuthorization();
 

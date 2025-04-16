@@ -1,9 +1,12 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using server.Models;
 using server.Data;
+using server.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using BCrypt.Net;
+
 
 namespace server.Services
 {
@@ -18,20 +21,32 @@ namespace server.Services
             _configuration = configuration;
         }
 
-        public bool Register(User user)
+        // Регистрация пользователя: асинхронный метод
+        public async Task<User> RegisterAsync(string username, string email, string password)
         {
-            if (_context.Users.Any(u => u.Username == user.Username))
-                return false;
+            if (await _context.Users.AnyAsync(u => u.Username == username || u.Email == email))
+                throw new Exception("Пользователь с таким именем или email уже существует.");
+
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+
+            var user = new User
+            {
+                Username = username,
+                Email = email,
+                Password = hashedPassword
+            };
 
             _context.Users.Add(user);
-            _context.SaveChanges();
-            return true;
+            await _context.SaveChangesAsync();
+
+            return user;
         }
 
+        // Вход пользователя; возвращает JWT-токен, если всё ок
         public string Login(string username, string password)
         {
-            var user = _context.Users.SingleOrDefault(u => u.Username == username && u.Password == password);
-            if (user == null)
+            var user = _context.Users.SingleOrDefault(u => u.Username == username);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
                 return null;
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -40,14 +55,15 @@ namespace server.Services
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.Name, user.Username)
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
                 }),
-                Expires = DateTime.UtcNow.AddHours(1),  // Устанавливаем срок действия токена
+                Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token); // Возвращаем строку с JWT
+            return tokenHandler.WriteToken(token);
         }
     }
 }

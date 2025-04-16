@@ -4,8 +4,8 @@ using server.Services;
 
 namespace server.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class AuthController : ControllerBase
     {
         private readonly AuthService _authService;
@@ -16,29 +16,33 @@ namespace server.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult Register([FromBody] User user)
+        public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
-            if (string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.Password))
-                return BadRequest("Имя пользователя и пароль обязательны");
+            if (!ModelState.IsValid)
+                return BadRequest("Некорректные данные.");
 
-            var result = _authService.Register(user);
-            if (!result)
-                return Conflict("Пользователь с таким именем уже существует");
-
-            return Ok("Регистрация прошла успешно");
+            try
+            {
+                var user = await _authService.RegisterAsync(model.Username, model.Email, model.Password);
+                return Ok(new { message = "Регистрация прошла успешно!", userId = user.Id });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromBody] User user)
+        public IActionResult Login([FromBody] LoginModel model)
         {
-            if (string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.Password))
-                return BadRequest("Имя пользователя и пароль обязательны");
+            if (!ModelState.IsValid)
+                return BadRequest("Некорректные данные.");
 
-            var token = _authService.Login(user.Username, user.Password);
+            var token = _authService.Login(model.Username, model.Password);
             if (token == null)
-                return Unauthorized("Неверное имя пользователя или пароль");
+                return Unauthorized(new { message = "Неверный логин или пароль" });
 
-            return Ok(new { Token = token });
+            return Ok(new { token });
         }
     }
 }
