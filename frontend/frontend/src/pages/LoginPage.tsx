@@ -38,7 +38,7 @@ const LoginPage = () => {
         justifyContent: 'center',
         alignItems: 'center',
         height: '100vh',
-        bgcolor: '#292626',
+        bgcolor: '#09191c',
       }}
     >
       <Paper
@@ -50,7 +50,7 @@ const LoginPage = () => {
           flexDirection: 'column',
           gap: 2,
           borderRadius: 3,
-          backgroundColor: '#292626',
+          backgroundColor: '#14353b',
         }}
       >
         <Typography
@@ -58,12 +58,12 @@ const LoginPage = () => {
           textAlign="center"
           fontWeight="bold"
           sx={{
-            fontFamily: '"Poppins", sans-serif',
-            color: '#333',
+            fontFamily: '"Poppins", XI20',
+            color: '#000',
             textShadow: '1px 1px 3px rgba(0, 0, 0, 0.2)',
           }}
         >
-          Вход
+          Locus Operis
         </Typography>
 
         {error && <Alert severity="error">{error}</Alert>}
@@ -75,6 +75,19 @@ const LoginPage = () => {
           fullWidth
           value={formData.username}
           onChange={handleChange}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: '#09191c',
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: '#000',
+              }
+              },
+              '& label.Mui-focused': {
+                color: '#000',
+            }
+          }}
         />
         <TextField
           label="Пароль"
@@ -84,23 +97,46 @@ const LoginPage = () => {
           fullWidth
           value={formData.password}
           onChange={handleChange}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: '#09191c',
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: '#000',
+              }
+              },
+              '& label.Mui-focused': {
+                color: '#000',
+            }
+          }}
         />
 
         <Button
           variant="contained"
           color="primary"
           fullWidth
-          sx={{ mt: 2 }}
+          sx={{
+            backgroundColor: '#09191c',
+            color: '#1f525c',
+            fontFamily: '"Poppins", XI20',
+            mt: 2 
+          }}
           onClick={handleSubmit}
         >
           Войти
         </Button>
 
         <Typography variant="body2" textAlign="center">
-          Нет аккаунта?{' '}
           <Button
-            variant="text"
+            variant="outlined"
             color="primary"
+            sx={{
+              color: '#000',
+              fontFamily: '"Poppins", XI20',
+              borderColor: '#0f272b',
+              borderWidth: '2px',
+            }}
             onClick={() => router.navigate({ to: '/register' })}
           >
             Зарегистрироваться

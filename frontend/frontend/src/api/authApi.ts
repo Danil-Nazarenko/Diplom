@@ -1,4 +1,4 @@
-const API_URL = 'https://localhost:5001/api/auth'; // Это нужно будет заменить на адрес твоего бэкенда
+const API_URL = 'https://localhost:5045/api/auth';
 
 export const loginUser = async (username: string, password: string) => {
   const response = await fetch(`${API_URL}/login`, {

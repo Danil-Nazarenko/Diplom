@@ -9,7 +9,7 @@ const Layout = () => {
         display: 'flex', 
         justifyContent: 'center', 
         alignItems: 'center', 
-        background: '#292626'
+        background: '#09191c'
       }}
     >
       <CssBaseline />

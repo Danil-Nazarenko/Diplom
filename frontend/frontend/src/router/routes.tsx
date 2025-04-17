@@ -9,7 +9,7 @@ const rootRoute = createRootRoute({
 
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/',
+  path: '/login',
   component: LoginPage,
 });
 
