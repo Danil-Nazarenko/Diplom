@@ -6,6 +6,7 @@ const RegisterPage = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({ username: '', password: '', email: '', confirmPassword: '' });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -14,9 +15,10 @@ const RegisterPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
-    if (!formData.username || !formData.password) {
-      setError('Введите имя пользователя и пароль!');
+    if (!formData.username || !formData.password || !formData.email) {
+      setError('Заполните все поля!');
       return;
     }
 
@@ -26,13 +28,29 @@ const RegisterPage = () => {
     }
 
     try {
-      // TODO: Отправить запрос на API регистрации
-      console.log('Отправка данных:', formData);
+      const response = await fetch('http://localhost:5045/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
 
-      // Если регистрация успешна — перенаправляем пользователя
-      router.navigate({ to: '/login' });
-    } catch (err) {
-      setError('Ошибка регистрации, попробуйте снова.');
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.message || 'Ошибка регистрации');
+      }
+
+      setSuccess('Регистрация прошла успешно! Перенаправление...');
+      setTimeout(() => {
+        router.navigate({ to: '/login' });
+      }, 2000);
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
@@ -72,6 +90,7 @@ const RegisterPage = () => {
         </Typography>
 
         {error && <Alert severity="error">{error}</Alert>}
+        {success && <Alert severity="success">{success}</Alert>}
 
         <TextField
           label="Имя пользователя"
@@ -80,22 +99,10 @@ const RegisterPage = () => {
           fullWidth
           value={formData.username}
           onChange={handleChange}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: '#09191c',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: '#000',
-              }
-              },
-              '& label.Mui-focused': {
-                color: '#000',
-            }
-          }}
+          sx={textFieldStyle}
         />
 
-         <TextField
+        <TextField
           label="Электронная почта"
           name="email"
           type="email"
@@ -103,21 +110,9 @@ const RegisterPage = () => {
           fullWidth
           value={formData.email}
           onChange={handleChange}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: '#09191c',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: '#000',
-              }
-              },
-              '& label.Mui-focused': {
-                color: '#000',
-            }
-          }}
+          sx={textFieldStyle}
         />
-        
+
         <TextField
           label="Пароль"
           name="password"
@@ -126,42 +121,18 @@ const RegisterPage = () => {
           fullWidth
           value={formData.password}
           onChange={handleChange}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: '#09191c',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: '#000',
-              }
-              },
-              '& label.Mui-focused': {
-                color: '#000',
-            }
-          }}
+          sx={textFieldStyle}
         />
 
         <TextField
           label="Подтверждение пароля"
           name="confirmPassword"
-          type="confirmPassword"
+          type="password"
           variant="outlined"
           fullWidth
           value={formData.confirmPassword}
           onChange={handleChange}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: '#09191c',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: '#000',
-              }
-              },
-              '& label.Mui-focused': {
-                color: '#000',
-            }
-          }}
+          sx={textFieldStyle}
         />
 
         <Button
@@ -172,7 +143,7 @@ const RegisterPage = () => {
             backgroundColor: '#14353b',
             color: '#288394',
             fontFamily: '"Poppins", XI20',
-            mt: 2 
+            mt: 2,
           }}
           onClick={handleSubmit}
         >
@@ -198,6 +169,20 @@ const RegisterPage = () => {
       </Paper>
     </Box>
   );
+};
+
+const textFieldStyle = {
+  '& .MuiOutlinedInput-root': {
+    '& fieldset': {
+      borderColor: '#09191c',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#000',
+    },
+  },
+  '& label.Mui-focused': {
+    color: '#000',
+  },
 };
 
 export default RegisterPage;
