@@ -38,7 +38,7 @@ const LoginPage = () => {
         justifyContent: 'center',
         alignItems: 'center',
         height: '100vh',
-        bgcolor: '#09191c',
+        bgcolor: '#14353b',
       }}
     >
       <Paper
@@ -50,7 +50,7 @@ const LoginPage = () => {
           flexDirection: 'column',
           gap: 2,
           borderRadius: 3,
-          backgroundColor: '#14353b',
+          backgroundColor: '#1e545e',
         }}
       >
         <Typography
@@ -117,8 +117,8 @@ const LoginPage = () => {
           color="primary"
           fullWidth
           sx={{
-            backgroundColor: '#09191c',
-            color: '#1f525c',
+            backgroundColor: '#14353b',
+            color: '#288394',
             fontFamily: '"Poppins", XI20',
             mt: 2 
           }}

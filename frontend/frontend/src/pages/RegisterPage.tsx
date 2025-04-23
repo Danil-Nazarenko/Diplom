@@ -43,7 +43,7 @@ const RegisterPage = () => {
         justifyContent: 'center',
         alignItems: 'center',
         height: '100vh',
-        bgcolor: '#09191c',
+        bgcolor: '#14353b',
       }}
     >
       <Paper
@@ -55,7 +55,7 @@ const RegisterPage = () => {
           flexDirection: 'column',
           gap: 2,
           borderRadius: 3,
-          backgroundColor: '#14353b',
+          backgroundColor: '#1e545e',
         }}
       >
         <Typography
@@ -169,8 +169,8 @@ const RegisterPage = () => {
           color="primary"
           fullWidth
           sx={{
-            backgroundColor: '#09191c',
-            color: '#1f525c',
+            backgroundColor: '#14353b',
+            color: '#288394',
             fontFamily: '"Poppins", XI20',
             mt: 2 
           }}
@@ -190,7 +190,7 @@ const RegisterPage = () => {
               borderColor: '#0f272b',
               borderWidth: '2px',
             }}
-            onClick={() => router.navigate({ to: '/login' })}
+            onClick={() => router.navigate({ to: '/' })}
           >
             Войти
           </Button>
