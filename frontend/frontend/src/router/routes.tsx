@@ -1,7 +1,8 @@
 import { createRouter, createRoute, createRootRoute } from '@tanstack/react-router';
 import Layout from '../layout';
 import LoginPage from '../pages/LoginPage';
-import RegisterPage from '../pages/RegisterPage'; // Импорт страницы регистрации
+import RegisterPage from '../pages/RegisterPage';
+import MainPage from '../pages/MainPage';
 
 const rootRoute = createRootRoute({
   component: Layout,
@@ -19,6 +20,12 @@ const registerRoute = createRoute({
   component: RegisterPage,
 });
 
+const mainRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/main',
+  component: MainPage,
+})
+
 export const router = createRouter({
-  routeTree: rootRoute.addChildren([loginRoute, registerRoute]), // Добавляем маршрут регистрации
+  routeTree: rootRoute.addChildren([loginRoute, registerRoute, mainRoute]),
 });
