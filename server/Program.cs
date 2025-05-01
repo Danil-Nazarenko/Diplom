@@ -45,7 +45,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Добавляем контроллеры
 builder.Services.AddControllers();
 
-// 👉 Подключение Swagger
+// Подключение Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
