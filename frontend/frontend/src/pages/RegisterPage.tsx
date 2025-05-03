@@ -47,7 +47,7 @@ const RegisterPage = () => {
 
       setSuccess('Регистрация прошла успешно! Перенаправление...');
       setTimeout(() => {
-        router.navigate({ to: '/login' });
+        router.navigate({ to: '/main' });
       }, 2000);
     } catch (err: any) {
       setError(err.message);
