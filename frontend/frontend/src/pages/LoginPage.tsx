@@ -21,11 +21,25 @@ const LoginPage = () => {
     }
 
     try {
-      // TODO: Отправить запрос на API аутентификации
-      console.log('Отправка данных:', formData);
+      // Отправка данных на сервер для аутентификации
+      const response = await fetch('http://localhost:5045/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-      // Если успешный вход — перенаправляем пользователя
-      router.navigate({ to: '/dashboard' });
+      if (!response.ok) {
+        throw new Error('Ошибка входа');
+      }
+
+      // Получаем JWT токен
+      const data = await response.json();
+      localStorage.setItem('authToken', data.token); // Сохраняем токен
+
+      // Перенаправление на главную страницу
+      router.navigate({ to: '/main' });
     } catch (err) {
       setError('Ошибка входа, попробуйте снова.');
     }
@@ -83,9 +97,9 @@ const LoginPage = () => {
               '&.Mui-focused fieldset': {
                 borderColor: '#000',
               }
-              },
-              '& label.Mui-focused': {
-                color: '#000',
+            },
+            '& label.Mui-focused': {
+              color: '#000',
             }
           }}
         />
@@ -105,9 +119,9 @@ const LoginPage = () => {
               '&.Mui-focused fieldset': {
                 borderColor: '#000',
               }
-              },
-              '& label.Mui-focused': {
-                color: '#000',
+            },
+            '& label.Mui-focused': {
+              color: '#000',
             }
           }}
         />
@@ -120,7 +134,7 @@ const LoginPage = () => {
             backgroundColor: '#14353b',
             color: '#288394',
             fontFamily: '"Poppins", XI20',
-            mt: 2 
+            mt: 2
           }}
           onClick={handleSubmit}
         >

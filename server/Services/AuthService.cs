@@ -21,7 +21,6 @@ namespace server.Services
             _configuration = configuration;
         }
 
-        // Регистрация пользователя: асинхронный метод
         public async Task<User> RegisterAsync(string username, string email, string password)
         {
             if (await _context.Users.AnyAsync(u => u.Username == username || u.Email == email))
