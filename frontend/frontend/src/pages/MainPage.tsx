@@ -2,7 +2,7 @@ import { Box, Drawer, List, ListItemText, ListItemButton, Typography } from '@mu
 
 const MainPage = () => {
   return (
-    <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#14353b' }}>
+    <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#1e545e' }}>
 
       <Drawer
         variant="permanent"
@@ -11,18 +11,24 @@ const MainPage = () => {
           width: 200,
           flexShrink: 0,
           '& .MuiDrawer-paper': {
-            width: 200,
+            width: 70,
             boxSizing: 'border-box',
-            bgcolor: '#1e545e',
+            bgcolor: '#14353b', 
             color: '#fff',
           },
         }}
       >
-        <Typography variant="h6" textAlign="center" sx={{ mt: 1 }}>
-          LocOp
+        <Typography 
+        variant="h6" 
+        textAlign="center" 
+        sx={{ 
+          mt: 1, 
+          fontFamily: "Romaben"
+        }}>
+          LO
         </Typography>
         <List>
-          {['Главная', 'Задачи', 'Профиль'].map((text) => (
+          {['Г', 'З', 'П'].map((text) => (
           <ListItemButton key={text}>
            <ListItemText primary={text} />
            </ListItemButton>

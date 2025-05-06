@@ -3,15 +3,7 @@ import { Box, CssBaseline } from '@mui/material';
 
 const Layout = () => {
   return (
-    <Box 
-      sx={{ 
-        minHeight: '100vh', 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        background: '#14353b'
-      }}
-    >
+    <Box>
       <CssBaseline />
       <Outlet />
     </Box>
