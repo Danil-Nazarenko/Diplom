@@ -1,9 +1,17 @@
-import { Box, Drawer, List, ListItemText, ListItemButton, Typography } from '@mui/material';
+import { Box, Drawer, List, ListItemButton, ListItemIcon, Typography, Tooltip } from '@mui/material';
+import HomeIcon from '@mui/icons-material/Home';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import PersonIcon from '@mui/icons-material/Person';
 
 const MainPage = () => {
+  const menuItems = [
+    { icon: <HomeIcon />, label: 'Главная' },
+    { icon: <AssignmentIcon />, label: 'Задачи' },
+    { icon: <PersonIcon />, label: 'Профиль' },
+  ];
+
   return (
     <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#1e545e' }}>
-
       <Drawer
         variant="permanent"
         anchor="left"
@@ -13,25 +21,31 @@ const MainPage = () => {
           '& .MuiDrawer-paper': {
             width: 70,
             boxSizing: 'border-box',
-            bgcolor: '#14353b', 
+            bgcolor: '#14353b',
             color: '#fff',
+            alignItems: 'center'
           },
         }}
       >
-        <Typography 
-        variant="h6" 
-        textAlign="center" 
-        sx={{ 
-          mt: 1, 
-          fontFamily: "Romaben"
-        }}>
+        <Typography
+          variant="h6"
+          textAlign="center"
+          sx={{
+            mt: 1,
+            fontFamily: 'Romaben'
+          }}
+        >
           LO
         </Typography>
         <List>
-          {['Г', 'З', 'П'].map((text) => (
-          <ListItemButton key={text}>
-           <ListItemText primary={text} />
-           </ListItemButton>
+          {menuItems.map((item, index) => (
+            <Tooltip title={item.label} placement="right" key={index}>
+              <ListItemButton sx={{ justifyContent: 'center' }}>
+                <ListItemIcon sx={{ color: '#fff', minWidth: 0 }}>
+                  {item.icon}
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
           ))}
         </List>
       </Drawer>
