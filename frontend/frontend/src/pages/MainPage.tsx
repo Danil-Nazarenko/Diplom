@@ -1,15 +1,36 @@
-import { Box, Drawer, List, ListItemButton, Tooltip, Typography } from '@mui/material';
+import { useState } from 'react';
+import {
+  Box,
+  Drawer,
+  List,
+  ListItemButton,
+  Tooltip,
+  Typography,
+  TextField,
+  Button,
+  ListItemText,
+} from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import PersonIcon from '@mui/icons-material/Person';
 
 const menuItems = [
-  { label: 'Главное', icon: <HomeIcon /> },
-  { label: 'Задачи', icon: <AssignmentIcon /> },
+  { label: 'Задачи', icon: <HomeIcon /> },
+  { label: 'Календарь', icon: <AssignmentIcon /> },
   { label: 'Профиль', icon: <PersonIcon /> },
 ];
 
 const MainPage = () => {
+  const [themes, setThemes] = useState<string[]>([]);
+  const [newTheme, setNewTheme] = useState('');
+
+  const handleAddTheme = () => {
+    if (newTheme.trim()) {
+      setThemes([...themes, newTheme.trim()]);
+      setNewTheme('');
+    }
+  };
+
   return (
     <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#1e545e' }}>
       <Drawer
@@ -50,12 +71,64 @@ const MainPage = () => {
       </Drawer>
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <Typography variant="h4" color="#fff">
-          Добро пожаловать!
-        </Typography>
-        <Typography variant="body1" color="#ccc">
-          Это ваша главная страница.
-        </Typography>
+        <Box sx={{ mt: 4, mb: 2 }}>
+          <Typography variant="h6" color="#fff">
+            Создать новую тему
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
+            <TextField
+              label="Название темы"
+              variant="outlined"
+              value={newTheme}
+              onChange={(e) => setNewTheme(e.target.value)}
+              sx={{
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: '#09191c',
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: '#000',
+              }
+            },
+            '& label.Mui-focused': {
+              color: '#000',
+            }
+          }}
+            />
+            <Button 
+              variant="contained"
+              color="primary"
+              sx={{
+              backgroundColor: '#14353b',
+              color: '#288394',
+              fontFamily: '"Poppins", XI20',
+              mt: 2
+              }}
+              onClick={handleAddTheme}>
+              Добавить
+            </Button>
+          </Box>
+        </Box>
+
+        <Box sx={{ mt: 0 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              color: '#fff',
+              mt: 1,
+              fontFamily: 'Romaben',
+            }}
+          >
+            Ваши темы:
+          </Typography>
+          <List>
+            {themes.map((theme, index) => (
+              <ListItemButton key={index} sx={{ bgcolor: '#1b6c77', my: 1, borderRadius: 1 }}>
+                <ListItemText primary={theme} primaryTypographyProps={{ color: '#fff' }} />
+              </ListItemButton>
+            ))}
+          </List>
+        </Box>
       </Box>
     </Box>
   );
