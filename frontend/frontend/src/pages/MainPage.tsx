@@ -1,18 +1,15 @@
-import { useState } from 'react';
-import {
-  Box,
-  Drawer,
-  List,
-  ListItemButton,
-  Tooltip,
-  Typography,
-  TextField,
-  Button,
-  ListItemText,
-} from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Box, Drawer, List, ListItemButton, Tooltip, Typography, TextField, Button, ListItemText } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import PersonIcon from '@mui/icons-material/Person';
+import { getTopics, createTopic } from '../api/topicsApi';
+
+interface Topic {
+  id: number;
+  title: string;
+  userId?: string;
+}
 
 const menuItems = [
   { label: 'Задачи', icon: <HomeIcon /> },
@@ -21,13 +18,30 @@ const menuItems = [
 ];
 
 const MainPage = () => {
-  const [themes, setThemes] = useState<string[]>([]);
+  const [themes, setThemes] = useState<Topic[]>([]);
   const [newTheme, setNewTheme] = useState('');
 
-  const handleAddTheme = () => {
-    if (newTheme.trim()) {
-      setThemes([...themes, newTheme.trim()]);
+  useEffect(() => {
+    const fetchThemes = async () => {
+      try {
+        const data = await getTopics();
+        setThemes(data);
+      } catch (error) {
+        console.error('Ошибка при загрузке тем:', error);
+      }
+    };
+    fetchThemes();
+  }, []);
+
+  const handleAddTheme = async () => {
+    if (!newTheme.trim()) return;
+
+    try {
+      const created = await createTopic(newTheme.trim());
+      setThemes(prev => [...prev, created]);
       setNewTheme('');
+    } catch (error) {
+      console.error('Ошибка при создании темы:', error);
     }
   };
 
@@ -82,27 +96,27 @@ const MainPage = () => {
               value={newTheme}
               onChange={(e) => setNewTheme(e.target.value)}
               sx={{
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: '#09191c',
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: '#000',
-              }
-            },
-            '& label.Mui-focused': {
-              color: '#000',
-            }
-          }}
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: '#09191c',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#000',
+                  }
+                },
+                '& label.Mui-focused': {
+                  color: '#000',
+                }
+              }}
             />
             <Button 
               variant="contained"
               color="primary"
               sx={{
-              backgroundColor: '#14353b',
-              color: '#288394',
-              fontFamily: '"Poppins", XI20',
-              mt: 2
+                backgroundColor: '#14353b',
+                color: '#288394',
+                fontFamily: '"Poppins", XI20',
+                mt: 2
               }}
               onClick={handleAddTheme}>
               Добавить
@@ -122,9 +136,9 @@ const MainPage = () => {
             Ваши темы:
           </Typography>
           <List>
-            {themes.map((theme, index) => (
-              <ListItemButton key={index} sx={{ bgcolor: '#1b6c77', my: 1, borderRadius: 1 }}>
-                <ListItemText primary={theme} primaryTypographyProps={{ color: '#fff' }} />
+            {themes.map((theme) => (
+              <ListItemButton key={theme.id} sx={{ bgcolor: '#1b6c77', my: 1, borderRadius: 1 }}>
+                <ListItemText primary={theme.title} primaryTypographyProps={{ color: '#fff' }} />
               </ListItemButton>
             ))}
           </List>
