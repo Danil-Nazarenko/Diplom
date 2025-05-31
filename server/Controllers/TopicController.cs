@@ -23,7 +23,7 @@ namespace server.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTopics()
         {
-            var userId = User.FindFirst("id")?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
             if (userId == null)
                 return Unauthorized();
@@ -33,18 +33,18 @@ namespace server.Controllers
                 .ToListAsync();
 
             return Ok(topics);
-        }
+        }   
 
         [HttpPost]
         public async Task<IActionResult> CreateTopic([FromBody] TopicModel topic)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var userId = User.FindFirst("id")?.Value;
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
             if (userId == null)
                 return Unauthorized();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
             topic.UserId = userId;
 
