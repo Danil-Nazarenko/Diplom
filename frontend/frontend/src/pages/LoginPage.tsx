@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Box, Button, TextField, Typography, Paper, Alert } from '@mui/material';
+import { Box, Button, TextField, Typography, Paper, Alert, CircularProgress } from '@mui/material';
 import { useRouter } from '@tanstack/react-router';
+import { loginUser } from '../api/authApi';
 
 const LoginPage = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -14,35 +16,27 @@ const LoginPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    if (loading) return;
 
     if (!formData.username || !formData.password) {
       setError('Введите имя пользователя и пароль!');
       return;
     }
 
+    setLoading(true);
     try {
-      const response = await fetch('http://localhost:5045/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+      const data = await loginUser(formData.username, formData.password); 
 
-      if (!response.ok) {
-        throw new Error('Ошибка входа');
-      }
-
-      const data = await response.json();
-
-      // ✅ Сохраняем токен и userId
       localStorage.setItem('authToken', data.token);
       localStorage.setItem('userId', data.userId);
 
-      // ⏩ Переход на главную
       router.navigate({ to: '/main' });
-    } catch (err) {
-      setError('Ошибка входа, попробуйте снова.');
+    } catch (err: any) { 
+      console.error('Ошибка входа:', err);
+      setError(err.message || 'Ошибка входа, попробуйте снова.'); 
+    } finally {
+      setLoading(false); 
     }
   };
 
@@ -90,6 +84,7 @@ const LoginPage = () => {
           fullWidth
           value={formData.username}
           onChange={handleChange}
+          disabled={loading}
           sx={{
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
@@ -112,6 +107,7 @@ const LoginPage = () => {
           fullWidth
           value={formData.password}
           onChange={handleChange}
+          disabled={loading}
           sx={{
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
@@ -138,8 +134,9 @@ const LoginPage = () => {
             mt: 2
           }}
           onClick={handleSubmit}
+          disabled={loading}
         >
-          Войти
+          {loading ? <CircularProgress size={24} color="inherit" /> : 'Войти'} {}
         </Button>
 
         <Typography variant="body2" textAlign="center">
@@ -153,6 +150,7 @@ const LoginPage = () => {
               borderWidth: '2px',
             }}
             onClick={() => router.navigate({ to: '/register' })}
+            disabled={loading} // ✅ Отключаем кнопку во время загрузки
           >
             Зарегистрироваться
           </Button>

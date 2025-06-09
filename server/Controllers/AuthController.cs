@@ -19,16 +19,20 @@ namespace server.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Некорректные данные.");
+                return BadRequest(new { message = "Некорректные данные." });
 
             try
             {
                 var user = await _authService.RegisterAsync(model.Username, model.Email, model.Password);
 
-                // Генерация JWT токена сразу после регистрации
                 var token = _authService.GenerateJwtToken(user);
 
-                return Ok(new { message = "Регистрация прошла успешно!", token, userId = user.Id });
+                return Ok(new
+                {
+                    message = "Регистрация прошла успешно!",
+                    token,
+                    userId = user.Id
+                });
             }
             catch (Exception ex)
             {
@@ -37,16 +41,29 @@ namespace server.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginModel model)
+        public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Некорректные данные.");
+                return BadRequest(new { message = "Некорректные данные." });
 
-            var (token, user) = _authService.LoginWithUser(model.Username, model.Password);
-            if (token == null || user == null)
-                return Unauthorized(new { message = "Неверный логин или пароль" });
+            try
+            {
+                var (token, user) = await Task.Run(() => _authService.LoginWithUser(model.Username, model.Password));
 
-            return Ok(new { token, userId = user.Id });
+                if (token == null || user == null)
+                    return Unauthorized(new { message = "Неверный логин или пароль" });
+
+                return Ok(new
+                {
+                    message = "Вход выполнен успешно!",
+                    token,
+                    userId = user.Id
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ошибка сервера", error = ex.Message });
+            }
         }
     }
 }

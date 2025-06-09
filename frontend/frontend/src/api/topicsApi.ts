@@ -9,7 +9,7 @@ export interface Topic {
 const API_BASE_URL = 'http://localhost:5045/api/Topics';
 
 const getAuthHeader = () => {
-  const token = localStorage.getItem('authToken'); // исправлено: был "token"
+  const token = localStorage.getItem('token');  // <-- важное исправление
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
