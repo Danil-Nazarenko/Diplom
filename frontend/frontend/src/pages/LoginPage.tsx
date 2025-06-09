@@ -21,7 +21,6 @@ const LoginPage = () => {
     }
 
     try {
-      // Отправка данных на сервер для аутентификации
       const response = await fetch('http://localhost:5045/api/auth/login', {
         method: 'POST',
         headers: {
@@ -34,11 +33,13 @@ const LoginPage = () => {
         throw new Error('Ошибка входа');
       }
 
-      // Получаем JWT токен
       const data = await response.json();
-      localStorage.setItem('authToken', data.token); // Сохраняем токен
 
-      // Перенаправление на главную страницу
+      // ✅ Сохраняем токен и userId
+      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('userId', data.userId);
+
+      // ⏩ Переход на главную
       router.navigate({ to: '/main' });
     } catch (err) {
       setError('Ошибка входа, попробуйте снова.');

@@ -45,6 +45,16 @@ const RegisterPage = () => {
         throw new Error(errData.message || 'Ошибка регистрации');
       }
 
+      const data = await response.json();
+
+      if (data.userId) {
+        localStorage.setItem('userId', data.userId);
+      }
+
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
+
       setSuccess('Регистрация прошла успешно! Перенаправление...');
       setTimeout(() => {
         router.navigate({ to: '/main' });

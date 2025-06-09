@@ -8,9 +8,9 @@ using System.Linq;
 
 namespace server.Controllers
 {
+    [Authorize] 
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] 
     public class TopicsController : ControllerBase
     {
         private readonly AppDbContext _context;

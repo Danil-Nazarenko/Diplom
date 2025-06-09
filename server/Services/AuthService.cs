@@ -7,7 +7,6 @@ using System.Security.Claims;
 using System.Text;
 using BCrypt.Net;
 
-
 namespace server.Services
 {
     public class AuthService
@@ -41,13 +40,27 @@ namespace server.Services
             return user;
         }
 
-        // Вход пользователя; возвращает JWT-токен, если всё ок
         public string Login(string username, string password)
         {
             var user = _context.Users.SingleOrDefault(u => u.Username == username);
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
                 return null;
 
+            return GenerateJwtToken(user);
+        }
+
+        public (string? token, User? user) LoginWithUser(string username, string password)
+        {
+            var user = _context.Users.SingleOrDefault(u => u.Username == username);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.Password))
+                return (null, null);
+
+            var token = GenerateJwtToken(user);
+            return (token, user);
+        }
+
+        public string GenerateJwtToken(User user)
+        {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]);
             var tokenDescriptor = new SecurityTokenDescriptor

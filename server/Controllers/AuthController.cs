@@ -24,7 +24,11 @@ namespace server.Controllers
             try
             {
                 var user = await _authService.RegisterAsync(model.Username, model.Email, model.Password);
-                return Ok(new { message = "Регистрация прошла успешно!", userId = user.Id });
+
+                // Генерация JWT токена сразу после регистрации
+                var token = _authService.GenerateJwtToken(user);
+
+                return Ok(new { message = "Регистрация прошла успешно!", token, userId = user.Id });
             }
             catch (Exception ex)
             {
@@ -38,11 +42,11 @@ namespace server.Controllers
             if (!ModelState.IsValid)
                 return BadRequest("Некорректные данные.");
 
-            var token = _authService.Login(model.Username, model.Password);
-            if (token == null)
+            var (token, user) = _authService.LoginWithUser(model.Username, model.Password);
+            if (token == null || user == null)
                 return Unauthorized(new { message = "Неверный логин или пароль" });
 
-            return Ok(new { token });
+            return Ok(new { token, userId = user.Id });
         }
     }
 }
