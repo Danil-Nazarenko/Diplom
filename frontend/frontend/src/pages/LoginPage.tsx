@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Box, Button, TextField, Typography, Paper, Alert, CircularProgress } from '@mui/material';
 import { useRouter } from '@tanstack/react-router';
 import { loginUser } from '../api/authApi';
+import { saveAuth } from '../utils/authHelper'; // ✅ Импорт функции сохранения авторизации
 
 const LoginPage = () => {
   const router = useRouter();
@@ -16,7 +17,7 @@ const LoginPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     if (loading) return;
 
     if (!formData.username || !formData.password) {
@@ -26,17 +27,16 @@ const LoginPage = () => {
 
     setLoading(true);
     try {
-      const data = await loginUser(formData.username, formData.password); 
+      const data = await loginUser(formData.username, formData.password);
 
-      localStorage.setItem('authToken', data.token);
-      localStorage.setItem('userId', data.userId);
+      saveAuth(data.token, data.userId); // ✅ Сохраняем авторизацию централизованно
 
       router.navigate({ to: '/main' });
-    } catch (err: any) { 
+    } catch (err: any) {
       console.error('Ошибка входа:', err);
-      setError(err.message || 'Ошибка входа, попробуйте снова.'); 
+      setError(err.message || 'Ошибка входа, попробуйте снова.');
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -92,11 +92,11 @@ const LoginPage = () => {
               },
               '&.Mui-focused fieldset': {
                 borderColor: '#000',
-              }
+              },
             },
             '& label.Mui-focused': {
               color: '#000',
-            }
+            },
           }}
         />
         <TextField
@@ -115,11 +115,11 @@ const LoginPage = () => {
               },
               '&.Mui-focused fieldset': {
                 borderColor: '#000',
-              }
+              },
             },
             '& label.Mui-focused': {
               color: '#000',
-            }
+            },
           }}
         />
 
@@ -131,12 +131,12 @@ const LoginPage = () => {
             backgroundColor: '#14353b',
             color: '#288394',
             fontFamily: '"Poppins", XI20',
-            mt: 2
+            mt: 2,
           }}
           onClick={handleSubmit}
           disabled={loading}
         >
-          {loading ? <CircularProgress size={24} color="inherit" /> : 'Войти'} {}
+          {loading ? <CircularProgress size={24} color="inherit" /> : 'Войти'}
         </Button>
 
         <Typography variant="body2" textAlign="center">
@@ -150,7 +150,7 @@ const LoginPage = () => {
               borderWidth: '2px',
             }}
             onClick={() => router.navigate({ to: '/register' })}
-            disabled={loading} // ✅ Отключаем кнопку во время загрузки
+            disabled={loading}
           >
             Зарегистрироваться
           </Button>
