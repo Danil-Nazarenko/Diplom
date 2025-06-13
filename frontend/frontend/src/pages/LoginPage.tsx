@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Box, Button, TextField, Typography, Paper, Alert, CircularProgress } from '@mui/material';
 import { useRouter } from '@tanstack/react-router';
 import { loginUser } from '../api/authApi';
-import { saveAuth } from '../utils/authHelper'; // ✅ Импорт функции сохранения авторизации
+import { saveAuth } from '../utils/authHelper';
 
 const LoginPage = () => {
   const router = useRouter();
@@ -29,7 +29,7 @@ const LoginPage = () => {
     try {
       const data = await loginUser(formData.username, formData.password);
 
-      saveAuth(data.token, data.userId); // ✅ Сохраняем авторизацию централизованно
+      saveAuth(data.token, data.userId); 
 
       router.navigate({ to: '/main' });
     } catch (err: any) {
