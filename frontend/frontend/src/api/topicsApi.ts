@@ -1,5 +1,4 @@
 import api from './axiosConfig';
-import { getUserId } from '../utils/authHelper';
 
 export interface Topic {
   id: number;
@@ -13,9 +12,16 @@ export const getTopics = async (): Promise<Topic[]> => {
 };
 
 export const createTopic = async (title: string): Promise<Topic> => {
-  const userId = getUserId(); 
-  const response = await api.post<Topic>('/Topics', { title, userId });
-  return response.data;
+  const payload = { title }; // удалили userId
+  console.log('Отправка темы на сервер:', payload); // отладочный лог
+
+  try {
+    const response = await api.post<Topic>('/Topics', payload);
+    return response.data;
+  } catch (error: any) {
+    console.error('Ошибка при создании темы:', error);
+    throw error;
+  }
 };
 
 export const deleteTopic = async (id: number): Promise<void> => {
