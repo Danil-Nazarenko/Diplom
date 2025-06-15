@@ -1,14 +1,12 @@
-import { useParams } from 'react-router-dom';
+import { useMatch } from '@tanstack/react-router';
+import { tasksRoute } from '../router/routes';
 
 const TasksPage = () => {
-  const { topicId } = useParams();
+  const match = useMatch({ from: tasksRoute.id }); // <-- ключевая строка
 
-  return (
-    <div className="p-4">
-      <h2 className="text-2xl font-semibold mb-4">Задачи темы #{topicId}</h2>
-      {/* Здесь позже будут отображаться задачи */}
-    </div>
-  );
+  const { topicId } = match.params;
+
+  return <div>Задачи для темы {topicId}</div>;
 };
 
 export default TasksPage;

@@ -3,6 +3,7 @@ import Layout from '../layout';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import MainPage from '../pages/MainPage';
+import TasksPage from '../pages/TasksPage';
 
 const rootRoute = createRootRoute({
   component: Layout,
@@ -24,8 +25,21 @@ const mainRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/main',
   component: MainPage,
-})
+});
+
+const tasksRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/tasks/$topicId',
+  component: TasksPage,
+});
+
+export { tasksRoute };
 
 export const router = createRouter({
-  routeTree: rootRoute.addChildren([loginRoute, registerRoute, mainRoute]),
+  routeTree: rootRoute.addChildren([
+    loginRoute,
+    registerRoute,
+    mainRoute,
+    tasksRoute,
+  ]),
 });

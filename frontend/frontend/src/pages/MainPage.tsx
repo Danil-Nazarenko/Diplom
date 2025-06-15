@@ -4,6 +4,8 @@ import HomeIcon from '@mui/icons-material/Home';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import PersonIcon from '@mui/icons-material/Person';
 import { getTopics, createTopic } from '../api/topicsApi';
+import { useRouter } from '@tanstack/react-router';
+import { tasksRoute } from '../router/routes'; // ⚠️ Убедись, что tasksRoute экспортируется
 
 interface Topic {
   id: number;
@@ -20,6 +22,7 @@ const menuItems = [
 const MainPage = () => {
   const [themes, setThemes] = useState<Topic[]>([]);
   const [newTheme, setNewTheme] = useState('');
+  const router = useRouter(); // ⬅️ Добавляем хук роутера
 
   useEffect(() => {
     const fetchThemes = async () => {
@@ -45,6 +48,10 @@ const MainPage = () => {
     }
   };
 
+  const goToTasks = (topicId: number) => {
+    router.navigate({ to: tasksRoute.to, params: { topicId: topicId.toString() } });
+  };
+
   return (
     <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#1e545e' }}>
       <Drawer
@@ -63,13 +70,7 @@ const MainPage = () => {
           },
         }}
       >
-        <Typography
-          variant="h6"
-          sx={{
-            mt: 1,
-            fontFamily: 'Romaben',
-          }}
-        >
+        <Typography variant="h6" sx={{ mt: 1, fontFamily: 'Romaben' }}>
           LO
         </Typography>
 
@@ -86,9 +87,7 @@ const MainPage = () => {
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Box sx={{ mt: 4, mb: 2 }}>
-          <Typography variant="h6" color="#fff">
-            Создать новую тему
-          </Typography>
+          <Typography variant="h6" color="#fff">Создать новую тему</Typography>
           <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
             <TextField
               label="Название темы"
@@ -97,16 +96,10 @@ const MainPage = () => {
               onChange={(e) => setNewTheme(e.target.value)}
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: '#09191c',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#000',
-                  }
+                  '& fieldset': { borderColor: '#09191c' },
+                  '&.Mui-focused fieldset': { borderColor: '#000' },
                 },
-                '& label.Mui-focused': {
-                  color: '#000',
-                }
+                '& label.Mui-focused': { color: '#000' },
               }}
             />
             <Button 
@@ -153,6 +146,7 @@ const MainPage = () => {
                     bgcolor: '#288394',
                   },
                 }}
+                onClick={() => goToTasks(theme.id)} // ⬅️ Обработчик клика
               >
                 {theme.title}
               </Button>
