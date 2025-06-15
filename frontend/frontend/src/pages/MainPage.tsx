@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Drawer, List, ListItemButton, Tooltip, Typography, TextField, Button, ListItemText } from '@mui/material';
+import { Box, Drawer, List, Tooltip, Typography, TextField, Button } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import PersonIcon from '@mui/icons-material/Person';
@@ -76,9 +76,9 @@ const MainPage = () => {
         <List sx={{ mt: 2 }}>
           {menuItems.map((item, index) => (
             <Tooltip title={item.label} placement="right" key={index}>
-              <ListItemButton sx={{ justifyContent: 'center' }}>
+              <Box component="div" sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
                 {item.icon}
-              </ListItemButton>
+              </Box>
             </Tooltip>
           ))}
         </List>
@@ -135,13 +135,29 @@ const MainPage = () => {
           >
             Ваши темы:
           </Typography>
-          <List>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
             {themes.map((theme) => (
-              <ListItemButton key={theme.id} sx={{ bgcolor: '#1b6c77', my: 1, borderRadius: 1 }}>
-                <ListItemText primary={theme.title} primaryTypographyProps={{ color: '#fff' }} />
-              </ListItemButton>
+              <Button
+                key={theme.id}
+                variant="contained"
+                sx={{
+                  width: 'calc(50% - 8px)',
+                  bgcolor: '#1b6c77',
+                  color: '#fff',
+                  textAlign: 'center',
+                  fontSize: '16px',
+                  fontFamily: 'Poppins',
+                  borderRadius: 2,
+                  py: 2,
+                  '&:hover': {
+                    bgcolor: '#288394',
+                  },
+                }}
+              >
+                {theme.title}
+              </Button>
             ))}
-          </List>
+          </Box>
         </Box>
       </Box>
     </Box>
