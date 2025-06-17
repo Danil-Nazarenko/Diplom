@@ -5,7 +5,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import PersonIcon from '@mui/icons-material/Person';
 import { getTopics, createTopic } from '../api/topicsApi';
 import { useRouter } from '@tanstack/react-router';
-import { tasksRoute } from '../router/routes'; // ⚠️ Убедись, что tasksRoute экспортируется
+import { tasksRoute } from '../router/routes'; 
 
 interface Topic {
   id: number;
@@ -22,7 +22,7 @@ const menuItems = [
 const MainPage = () => {
   const [themes, setThemes] = useState<Topic[]>([]);
   const [newTheme, setNewTheme] = useState('');
-  const router = useRouter(); // ⬅️ Добавляем хук роутера
+  const router = useRouter(); 
 
   useEffect(() => {
     const fetchThemes = async () => {
@@ -146,7 +146,7 @@ const MainPage = () => {
                     bgcolor: '#288394',
                   },
                 }}
-                onClick={() => goToTasks(theme.id)} // ⬅️ Обработчик клика
+                onClick={() => goToTasks(theme.id)} 
               >
                 {theme.title}
               </Button>

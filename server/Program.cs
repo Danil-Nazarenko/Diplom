@@ -21,7 +21,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]))
         };
 
-        // Добавим вывод ошибок в консоль
         options.Events = new JwtBearerEvents
         {
             OnAuthenticationFailed = context =>
