@@ -26,9 +26,7 @@ const menuItems = [
 ];
 
 export default function TasksPage() {
-  // Получение topicId с указанием маршрута
   const { topicId } = useParams({ from: '/tasks/$topicId' });
-
   const numericTopicId = topicId ? Number(topicId) : undefined;
 
   if (topicId !== undefined && isNaN(numericTopicId!)) {
@@ -50,11 +48,10 @@ export default function TasksPage() {
     );
   }
 
-  const { tasks, addTask, updateTask, moveTaskToStatus, addSubtask, setTasks } = useTasks();
-
+  const { tasks, updateTask, moveTaskToStatus, addSubtask, setTasks } = useTasks();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
-  // Загрузка задач с сервера при смене темы
   useEffect(() => {
     if (numericTopicId === undefined) return;
 
@@ -63,7 +60,6 @@ export default function TasksPage() {
         const serverTasks: Task[] = await getTasksByTopicId(numericTopicId);
         setTasks(serverTasks);
       } catch (error) {
-        // Приводим error к строке для корректного логирования
         const message = error instanceof Error ? error.message : String(error);
         console.error('Ошибка загрузки задач:', message);
       }
@@ -82,29 +78,25 @@ export default function TasksPage() {
       ? tasks[0].title
       : 'Все задачи';
 
-  // Создание задачи с сохранением на сервер
   const handleCreateTask = async (task: Omit<Task, 'id' | 'topicId'>) => {
-    if (numericTopicId === undefined) return;
+    if (numericTopicId === undefined || isCreating) return;
 
+    setIsCreating(true);
     try {
-      const createdTask: Task = await createTask({ ...task, topicId: numericTopicId });
-      setTasks((prev) => [...prev, createdTask]);
+      await createTask({ ...task, topicId: numericTopicId });
+      const serverTasks: Task[] = await getTasksByTopicId(numericTopicId);
+      setTasks(serverTasks);
       setIsDialogOpen(false);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error('Ошибка создания задачи:', message);
+    } finally {
+      setIsCreating(false);
     }
   };
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        bgcolor: '#1e545e',
-        color: '#fff',
-        minHeight: '100vh',
-      }}
-    >
+    <Box sx={{ display: 'flex', bgcolor: '#1e545e', color: '#fff', minHeight: '100vh' }}>
       <Drawer
         variant="permanent"
         anchor="left"
@@ -149,18 +141,8 @@ export default function TasksPage() {
         </List>
       </Drawer>
 
-      <Box
-        sx={{
-          width: 'calc(100% - 70px)',
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-        }}
-      >
-        <AppBar
-          position="static"
-          sx={{ bgcolor: '#14353b', height: 64, justifyContent: 'center' }}
-        >
+      <Box sx={{ width: 'calc(100% - 70px)', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <AppBar position="static" sx={{ bgcolor: '#14353b', height: 64, justifyContent: 'center' }}>
           <Toolbar>
             <Typography
               variant="h5"
@@ -176,15 +158,7 @@ export default function TasksPage() {
           </Toolbar>
         </AppBar>
 
-        <Box
-          sx={{
-            p: 3,
-            flexGrow: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            overflowY: 'auto',
-          }}
-        >
+        <Box sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
             <Button
               variant="contained"
@@ -212,7 +186,6 @@ export default function TasksPage() {
               open={isDialogOpen}
               onClose={() => setIsDialogOpen(false)}
               onCreate={handleCreateTask}
-              topicId={numericTopicId}
             />
           )}
         </Box>

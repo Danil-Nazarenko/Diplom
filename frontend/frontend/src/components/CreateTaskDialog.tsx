@@ -9,20 +9,17 @@ import {
   MenuItem,
 } from '@mui/material';
 import { TaskStatus, TaskPriority, TaskPriorityType } from '../constants/taskConstants';
-import { createTask } from '../api/tasksApi';
 import { Task } from '../types/task';
 
 interface CreateTaskDialogProps {
   open: boolean;
   onClose: () => void;
-  topicId: number;
-  onCreate: (task: Omit<Task, 'id' | 'topicId'>) => void; 
+  onCreate: (task: Omit<Task, 'id' | 'topicId'>) => void;
 }
 
 export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
   open,
   onClose,
-  topicId,
   onCreate,
 }) => {
   const [title, setTitle] = useState('');
@@ -30,37 +27,24 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
   const [deadline, setDeadline] = useState('');
   const [priority, setPriority] = useState<TaskPriorityType>(TaskPriority.MEDIUM);
 
-  const handleCreate = async () => {
+  const handleCreate = () => {
     if (!title.trim()) return;
 
-    // Преобразуем дату в ISO-строку или undefined
     const taskData = {
       title,
       description,
       deadline: deadline ? new Date(deadline).toISOString() : undefined,
       priority,
       status: TaskStatus.NOT_STARTED,
-      topicId,
     };
 
-    console.log(taskData);
+    onCreate(taskData);
 
-    try {
-      await createTask(taskData);
-
-      setTitle('');
-      setDescription('');
-      setDeadline('');
-      setPriority(TaskPriority.MEDIUM);
-
-      onClose();
-
-      // передаём задачу без topicId и id (как ожидается по типу)
-      const { topicId, ...taskWithoutTopicId } = taskData;
-      onCreate(taskWithoutTopicId);
-    } catch (error) {
-      console.error('Ошибка при создании подзадачи:', error);
-    }
+    setTitle('');
+    setDescription('');
+    setDeadline('');
+    setPriority(TaskPriority.MEDIUM);
+    onClose();
   };
 
   return (
