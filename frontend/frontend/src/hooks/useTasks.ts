@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import { Task, TaskStatus, Subtask } from '../types/task';
+import { createTask, updateTask as apiUpdateTask, updateTaskStatus } from '../api/tasksApi';
+
+// Тип для создания задачи с обязательным topicId
+type CreateTaskPayload = Omit<Task, 'id'> & { topicId: number };
 
 function generateId(): string {
   return Date.now().toString() + Math.random().toString(36).substr(2, 5);
@@ -8,23 +12,41 @@ function generateId(): string {
 export function useTasks(initialTasks: Task[] = []) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
 
-  // Добавить новую задачу
-  const addTask = (task: Omit<Task, 'id'>) => {
-    const newId = generateId();
-    setTasks([...tasks, { ...task, id: newId }]);
+  // Создать новую задачу на сервере и добавить в локальный стейт
+  const addTask = async (task: CreateTaskPayload) => {
+    try {
+      const createdTask = await createTask(task);
+      setTasks(prev => [...prev, createdTask]);
+      return createdTask;
+    } catch (error) {
+      console.error('Ошибка создания задачи:', error);
+      throw error;
+    }
   };
 
-  // Обновить задачу
-  const updateTask = (id: string, updatedFields: Partial<Task>) => {
-    setTasks(tasks.map(t => (t.id === id ? { ...t, ...updatedFields } : t)));
+  // Обновить задачу полностью на сервере и в локальном состоянии
+  const updateTask = async (id: string, updatedFields: Partial<Task>) => {
+    const taskToUpdate = tasks.find(t => t.id === id);
+    if (!taskToUpdate) {
+      console.warn('Задача для обновления не найдена', id);
+      return;
+    }
+
+    const updatedTask = { ...taskToUpdate, ...updatedFields };
+    try {
+      const serverTask = await apiUpdateTask(updatedTask);
+      setTasks(prev => prev.map(t => (t.id === id ? serverTask : t)));
+    } catch (error) {
+      console.error('Ошибка обновления задачи:', error);
+    }
   };
 
-  // Переместить задачу между статусами
-  const moveTaskToStatus = (id: string, status: TaskStatus) => {
-    updateTask(id, { status });
+  // Обновить статус задачи (обертка над updateTask)
+  const moveTaskToStatus = async (id: string, status: TaskStatus) => {
+    await updateTask(id, { status });
   };
 
-  // Добавить подзадачу — subtask без id, status и subtasks
+  // Добавление подзадачи локально (позже можно расширить для API)
   const addSubtask = (taskId: string, subtask: Omit<Subtask, 'id'>) => {
     const newSubtask: Subtask = {
       ...subtask,

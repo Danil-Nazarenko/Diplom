@@ -8,41 +8,59 @@ import {
   Button,
   MenuItem,
 } from '@mui/material';
-import { Task, TaskPriority } from '../types/task';
+import { TaskStatus, TaskPriority, TaskPriorityType } from '../constants/taskConstants';
+import { createTask } from '../api/tasksApi';
+import { Task } from '../types/task';
 
 interface CreateTaskDialogProps {
   open: boolean;
   onClose: () => void;
-  onCreate: (task: Omit<Task, 'id'>) => void;
+  topicId: number;
+  onCreate: (task: Omit<Task, 'id' | 'topicId'>) => void; 
 }
 
 export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
   open,
   onClose,
+  topicId,
   onCreate,
 }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [deadline, setDeadline] = useState('');
-  const [priority, setPriority] = useState<TaskPriority>('medium');
+  const [priority, setPriority] = useState<TaskPriorityType>(TaskPriority.MEDIUM);
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!title.trim()) return;
 
-    onCreate({
+    // Преобразуем дату в ISO-строку или undefined
+    const taskData = {
       title,
       description,
-      deadline,
+      deadline: deadline ? new Date(deadline).toISOString() : undefined,
       priority,
-      status: 'not_started',
-    });
+      status: TaskStatus.NOT_STARTED,
+      topicId,
+    };
 
-    setTitle('');
-    setDescription('');
-    setDeadline('');
-    setPriority('medium');
+    console.log(taskData);
 
-    onClose();
+    try {
+      await createTask(taskData);
+
+      setTitle('');
+      setDescription('');
+      setDeadline('');
+      setPriority(TaskPriority.MEDIUM);
+
+      onClose();
+
+      // передаём задачу без topicId и id (как ожидается по типу)
+      const { topicId, ...taskWithoutTopicId } = taskData;
+      onCreate(taskWithoutTopicId);
+    } catch (error) {
+      console.error('Ошибка при создании подзадачи:', error);
+    }
   };
 
   return (
@@ -125,7 +143,7 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
           label="Приоритет"
           fullWidth
           value={priority}
-          onChange={(e) => setPriority(e.target.value as TaskPriority)}
+          onChange={(e) => setPriority(e.target.value as TaskPriorityType)}
           sx={{
             label: { color: '#ccc' },
             '& .MuiOutlinedInput-root': {
@@ -135,22 +153,22 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
             },
             '& .MuiSelect-select': {
               color:
-                priority === 'high'
+                priority === TaskPriority.HIGH
                   ? '#e57373'
-                  : priority === 'medium'
+                  : priority === TaskPriority.MEDIUM
                   ? '#fff176'
                   : '#81c784',
               fontWeight: 600,
             },
           }}
         >
-          <MenuItem value="low" sx={{ color: '#81c784', fontWeight: 600 }}>
+          <MenuItem value={TaskPriority.LOW} sx={{ color: '#81c784', fontWeight: 600 }}>
             Низкий
           </MenuItem>
-          <MenuItem value="medium" sx={{ color: '#fff176', fontWeight: 600 }}>
+          <MenuItem value={TaskPriority.MEDIUM} sx={{ color: '#fff176', fontWeight: 600 }}>
             Средний
           </MenuItem>
-          <MenuItem value="high" sx={{ color: '#e57373', fontWeight: 600 }}>
+          <MenuItem value={TaskPriority.HIGH} sx={{ color: '#e57373', fontWeight: 600 }}>
             Высокий
           </MenuItem>
         </TextField>

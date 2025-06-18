@@ -11,14 +11,12 @@ import {
 } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
-// Типы колонок
 const columns: { status: TaskStatus; label: string }[] = [
   { status: 'not_started', label: 'Не готово' },
   { status: 'in_progress', label: 'В процессе' },
   { status: 'done', label: 'Готово' },
 ];
 
-// Обёртка для колонки как Drop-зоны
 function DroppableColumn({ id, children }: { id: string; children: React.ReactNode }) {
   const { setNodeRef } = useDroppable({ id });
   return (
@@ -37,7 +35,6 @@ function DroppableColumn({ id, children }: { id: string; children: React.ReactNo
   );
 }
 
-// Обёртка для задачи как Draggable
 function DraggableTask({
   task,
   children,
@@ -53,7 +50,7 @@ function DraggableTask({
     transform: transform
       ? `translate(${transform.x}px, ${transform.y}px)`
       : undefined,
-    transition: 'transform 0.2s ease', // вручную прописали transition
+    transition: 'transform 0.2s ease',
     cursor: 'grab',
     zIndex: isDragging ? 1000 : 'auto',
   };
@@ -91,7 +88,11 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
 
     const task = tasks.find(t => t.id === active.id);
     if (task && task.status !== newStatus) {
+      // Обновляем локально
       onStatusChange(task.id, newStatus);
+
+      // Здесь можно вызвать API обновления на сервере, например:
+      // updateTask({ ...task, status: newStatus });
     }
   };
 

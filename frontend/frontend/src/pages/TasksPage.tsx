@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from '@tanstack/react-router';
 import {
   Box,
   Button,
@@ -7,7 +8,7 @@ import {
   List,
   Tooltip,
   AppBar,
-  Toolbar
+  Toolbar,
 } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import AssignmentIcon from '@mui/icons-material/Assignment';
@@ -16,6 +17,7 @@ import { TaskBoard } from '../components/TaskBoard';
 import { CreateTaskDialog } from '../components/CreateTaskDialog';
 import { useTasks } from '../hooks/useTasks';
 import { Task } from '../types/task';
+import { getTasksByTopicId, createTask } from '../api/tasksApi';
 
 const menuItems = [
   { label: 'Задачи', icon: <HomeIcon /> },
@@ -24,14 +26,74 @@ const menuItems = [
 ];
 
 export default function TasksPage() {
-  const { tasks, addTask, updateTask, moveTaskToStatus, addSubtask } = useTasks();
+  // Получение topicId с указанием маршрута
+  const { topicId } = useParams({ from: '/tasks/$topicId' });
+
+  const numericTopicId = topicId ? Number(topicId) : undefined;
+
+  if (topicId !== undefined && isNaN(numericTopicId!)) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          bgcolor: '#1e545e',
+          color: '#fff',
+          fontFamily: 'Romaben',
+          fontSize: 20,
+        }}
+      >
+        Некорректный ID темы
+      </Box>
+    );
+  }
+
+  const { tasks, addTask, updateTask, moveTaskToStatus, addSubtask, setTasks } = useTasks();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const selectedTaskTitle = tasks.length > 0 ? tasks[0].title : 'Все задачи';
+  // Загрузка задач с сервера при смене темы
+  useEffect(() => {
+    if (numericTopicId === undefined) return;
 
-  const handleCreateTask = (task: Omit<Task, 'id'>) => {
-    addTask(task);
-    setIsDialogOpen(false);
+    (async () => {
+      try {
+        const serverTasks: Task[] = await getTasksByTopicId(numericTopicId);
+        setTasks(serverTasks);
+      } catch (error) {
+        // Приводим error к строке для корректного логирования
+        const message = error instanceof Error ? error.message : String(error);
+        console.error('Ошибка загрузки задач:', message);
+      }
+    })();
+  }, [numericTopicId, setTasks]);
+
+  const filteredTasks =
+    numericTopicId !== undefined
+      ? tasks.filter((task) => task.topicId === numericTopicId)
+      : tasks;
+
+  const selectedTaskTitle =
+    numericTopicId !== undefined
+      ? `Тема №${numericTopicId}`
+      : tasks.length > 0
+      ? tasks[0].title
+      : 'Все задачи';
+
+  // Создание задачи с сохранением на сервер
+  const handleCreateTask = async (task: Omit<Task, 'id' | 'topicId'>) => {
+    if (numericTopicId === undefined) return;
+
+    try {
+      const createdTask: Task = await createTask({ ...task, topicId: numericTopicId });
+      setTasks((prev) => [...prev, createdTask]);
+      setIsDialogOpen(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('Ошибка создания задачи:', message);
+    }
   };
 
   return (
@@ -40,10 +102,9 @@ export default function TasksPage() {
         display: 'flex',
         bgcolor: '#1e545e',
         color: '#fff',
-        minHeight: '100vh', // вместо height: 100vh, чтобы контент расширялся
+        minHeight: '100vh',
       }}
     >
-      {/* Боковое меню */}
       <Drawer
         variant="permanent"
         anchor="left"
@@ -88,7 +149,6 @@ export default function TasksPage() {
         </List>
       </Drawer>
 
-      {/* Основной контент */}
       <Box
         sx={{
           width: 'calc(100% - 70px)',
@@ -97,8 +157,10 @@ export default function TasksPage() {
           minHeight: '100vh',
         }}
       >
-        {/* Шапка */}
-        <AppBar position="static" sx={{ bgcolor: '#14353b', height: 64, justifyContent: 'center' }}>
+        <AppBar
+          position="static"
+          sx={{ bgcolor: '#14353b', height: 64, justifyContent: 'center' }}
+        >
           <Toolbar>
             <Typography
               variant="h5"
@@ -114,14 +176,12 @@ export default function TasksPage() {
           </Toolbar>
         </AppBar>
 
-        {/* Контент с отступом от шапки */}
         <Box
           sx={{
             p: 3,
             flexGrow: 1,
             display: 'flex',
             flexDirection: 'column',
-            // Добавим overflow, чтобы при большом кол-ве задач скроллилась только эта область:
             overflowY: 'auto',
           }}
         >
@@ -141,17 +201,20 @@ export default function TasksPage() {
           </Box>
 
           <TaskBoard
-            tasks={tasks}
+            tasks={filteredTasks}
             onStatusChange={moveTaskToStatus}
             onTaskUpdate={updateTask}
             addSubtask={addSubtask}
           />
 
-          <CreateTaskDialog
-            open={isDialogOpen}
-            onClose={() => setIsDialogOpen(false)}
-            onCreate={handleCreateTask}
-          />
+          {numericTopicId !== undefined && (
+            <CreateTaskDialog
+              open={isDialogOpen}
+              onClose={() => setIsDialogOpen(false)}
+              onCreate={handleCreateTask}
+              topicId={numericTopicId}
+            />
+          )}
         </Box>
       </Box>
     </Box>

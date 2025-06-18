@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
 using System.ComponentModel.DataAnnotations;
+using System;
 
 namespace server.Controllers
 {
@@ -13,6 +14,8 @@ namespace server.Controllers
     {
         [Required]
         public string Title { get; set; }
+
+        public DateTime? Deadline { get; set; } 
     }
 
     [Authorize] 
@@ -56,7 +59,8 @@ namespace server.Controllers
             var topic = new TopicModel
             {
                 Title = dto.Title,
-                UserId = userId
+                UserId = userId,
+                Deadline = dto.Deadline 
             };
 
             _context.Topics.Add(topic);
