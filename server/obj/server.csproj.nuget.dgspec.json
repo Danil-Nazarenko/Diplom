@@ -54,6 +54,14 @@
               "target": "Package",
               "version": "[4.0.3, )"
             },
+            "LLamaSharp.Backend.Cpu": {
+              "target": "Package",
+              "version": "[0.24.0, )"
+            },
+            "LlamaSharp": {
+              "target": "Package",
+              "version": "[0.24.0, )"
+            },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
               "version": "[9.0.4, )"

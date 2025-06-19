@@ -4,9 +4,11 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using server.Data;
 using server.Services;
+using server.Ai;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Настройка JWT-аутентификации
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -36,6 +38,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -43,15 +46,24 @@ builder.Services.AddCors(options =>
         policy.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials(); // ВАЖНО: разрешаем передачу куков / токенов
+              .AllowCredentials();
     });
 });
 
-// Подключаем сервисы
+// DI сервисы
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// 👇 Регистрируем и инициализируем AiService
+builder.Services.AddSingleton<AiService>(provider =>
+{
+    var service = new AiService();
+    service.InitializeAsync().Wait(); // Синхронный вызов на старте
+    return service;
+});
+
+// Контроллеры и Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -1,11 +1,23 @@
 import { useState, useEffect } from 'react';
-import { Box, Drawer, List, Tooltip, Typography, TextField, Button, IconButton, Popover, ThemeProvider, createTheme,} from '@mui/material';
+import {
+  Box,
+  Drawer,
+  List,
+  Tooltip,
+  Typography,
+  TextField,
+  Button,
+  IconButton,
+  Popover,
+  ThemeProvider,
+  createTheme,
+} from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import PersonIcon from '@mui/icons-material/Person';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { getTopics, createTopic } from '../api/topicsApi';
-import { useRouter } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { tasksRoute } from '../router/routes';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -20,9 +32,9 @@ interface Topic {
 }
 
 const menuItems = [
-  { label: 'Задачи', icon: <HomeIcon /> },
-  { label: 'Календарь', icon: <AssignmentIcon /> },
-  { label: 'Профиль', icon: <PersonIcon /> },
+  { label: 'Задачи', icon: <HomeIcon />, path: '/main' },
+  { label: 'Календарь', icon: <AssignmentIcon />, path: '/calendar' },
+  { label: 'Профиль', icon: <PersonIcon />, path: '/profile' },
 ];
 
 const darkCalendarTheme = createTheme({
@@ -42,7 +54,7 @@ const MainPage = () => {
   const [newTheme, setNewTheme] = useState('');
   const [deadline, setDeadline] = useState<Dayjs | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const router = useRouter();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchThemes = async () => {
@@ -81,8 +93,9 @@ const MainPage = () => {
   const id = open ? 'datepicker-popover' : undefined;
 
   const goToTasks = (topicId: number) => {
-  router.navigate({ to: tasksRoute.to, params: { topicId } });
-};
+    navigate({ to: tasksRoute.to, params: { topicId } });
+  };
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#1e545e' }}>
@@ -109,7 +122,11 @@ const MainPage = () => {
           <List sx={{ mt: 2 }}>
             {menuItems.map((item, index) => (
               <Tooltip title={item.label} placement="right" key={index}>
-                <Box component="div" sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                <Box
+                  component="div"
+                  sx={{ display: 'flex', justifyContent: 'center', mt: 2, cursor: 'pointer' }}
+                  onClick={() => navigate({ to: item.path })}
+                >
                   {item.icon}
                 </Box>
               </Tooltip>
@@ -158,7 +175,6 @@ const MainPage = () => {
                   horizontal: 'left',
                 }}
               >
-                {/* Оборачиваем календарь в темную тему */}
                 <ThemeProvider theme={darkCalendarTheme}>
                   <Box sx={{ p: 2, bgcolor: '#1e1e1e' }}>
                     <DatePicker

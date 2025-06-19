@@ -9,12 +9,10 @@ import RegisterPage from '../pages/RegisterPage';
 import MainPage from '../pages/MainPage';
 import TasksPage from '../pages/TasksPage';
 
-// Корневой маршрут
 const rootRoute = createRootRoute({
   component: Layout,
 });
 
-// Маршруты
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
@@ -35,9 +33,10 @@ const mainRoute = createRoute({
 
 const tasksRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/tasks/$topicId', // 👈 тут исправлено
+  path: '/tasks/$topicId',
   component: TasksPage,
 });
+
 
 export { tasksRoute };
 

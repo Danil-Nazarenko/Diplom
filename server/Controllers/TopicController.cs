@@ -43,7 +43,26 @@ namespace server.Controllers
                 .ToListAsync();
 
             return Ok(topics);
-        }   
+        }
+
+        // Новый метод для получения темы по ID
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetTopicById(int id)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId == null)
+                return Unauthorized();
+
+            var topic = await _context.Topics
+                .Where(t => t.UserId == userId && t.Id == id)
+                .FirstOrDefaultAsync();
+
+            if (topic == null)
+                return NotFound();
+
+            return Ok(topic);
+        }
 
         [HttpPost]
         public async Task<IActionResult> CreateTopic([FromBody] CreateTopicDto dto)

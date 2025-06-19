@@ -18,6 +18,7 @@ import { CreateTaskDialog } from '../components/CreateTaskDialog';
 import { useTasks } from '../hooks/useTasks';
 import { Task } from '../types/task';
 import { getTasksByTopicId, createTask } from '../api/tasksApi';
+import { getTopicById } from '../api/topicsApi';
 
 const menuItems = [
   { label: 'Задачи', icon: <HomeIcon /> },
@@ -28,6 +29,9 @@ const menuItems = [
 export default function TasksPage() {
   const { topicId } = useParams({ from: '/tasks/$topicId' });
   const numericTopicId = topicId ? Number(topicId) : undefined;
+
+  const [topicName, setTopicName] = useState<string | null>(null);
+  const [topicDeadline, setTopicDeadline] = useState<string | null>(null);
 
   if (topicId !== undefined && isNaN(numericTopicId!)) {
     return (
@@ -52,6 +56,9 @@ export default function TasksPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
+  // Новый стейт для индикации загрузки ИИ
+  const [isAiLoading, setIsAiLoading] = useState(false);
+
   useEffect(() => {
     if (numericTopicId === undefined) return;
 
@@ -59,24 +66,18 @@ export default function TasksPage() {
       try {
         const serverTasks: Task[] = await getTasksByTopicId(numericTopicId);
         setTasks(serverTasks);
+
+        const topic = await getTopicById(numericTopicId);
+        setTopicName(topic.title);
+        setTopicDeadline(
+          topic.deadline ? new Date(topic.deadline).toLocaleDateString() : null
+        );
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        console.error('Ошибка загрузки задач:', message);
+        console.error('Ошибка при загрузке задач или темы:', message);
       }
     })();
   }, [numericTopicId, setTasks]);
-
-  const filteredTasks =
-    numericTopicId !== undefined
-      ? tasks.filter((task) => task.topicId === numericTopicId)
-      : tasks;
-
-  const selectedTaskTitle =
-    numericTopicId !== undefined
-      ? `Тема №${numericTopicId}`
-      : tasks.length > 0
-      ? tasks[0].title
-      : 'Все задачи';
 
   const handleCreateTask = async (task: Omit<Task, 'id' | 'topicId'>) => {
     if (numericTopicId === undefined || isCreating) return;
@@ -92,6 +93,34 @@ export default function TasksPage() {
       console.error('Ошибка создания задачи:', message);
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  // Обработчик для кнопки ИИ-ассистента
+  const handleUseAiAssistant = async () => {
+    if (!numericTopicId || isAiLoading) return;
+
+    setIsAiLoading(true);
+    try {
+      const response = await fetch(`/api/ai/generate-tasks?topicId=${numericTopicId}`, {
+        headers: {
+          // Добавь сюда токен авторизации, если нужен:
+          // Authorization: `Bearer ${yourAuthToken}`,
+        },
+      });
+      if (!response.ok) throw new Error('Ошибка при вызове ИИ');
+
+      const data = await response.json();
+      // Ожидаем, что data.tasks — массив подзадач в формате Task[]
+      if (Array.isArray(data.tasks)) {
+        setTasks((prev) => [...prev, ...data.tasks]);
+      } else {
+        console.warn('Неправильный формат данных от ИИ');
+      }
+    } catch (error) {
+      console.error('Ошибка при получении подзадач от ИИ:', error);
+    } finally {
+      setIsAiLoading(false);
     }
   };
 
@@ -142,24 +171,36 @@ export default function TasksPage() {
       </Drawer>
 
       <Box sx={{ width: 'calc(100% - 70px)', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <AppBar position="static" sx={{ bgcolor: '#14353b', height: 64, justifyContent: 'center' }}>
-          <Toolbar>
+        <AppBar position="static" sx={{ bgcolor: '#14353b', height: 64 }}>
+          <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', px: 2 }}>
             <Typography
               variant="h5"
               sx={{
                 fontWeight: 'bold',
                 color: '#e0f7fa',
                 fontFamily: 'Romaben',
-                ml: 2,
+                whiteSpace: 'nowrap',
               }}
             >
-              {selectedTaskTitle}
+              {topicName ?? 'Загрузка темы...'}
+            </Typography>
+
+            <Typography
+              variant="body1"
+              sx={{
+                color: '#a7ffeb',
+                fontFamily: 'Romaben',
+                fontSize: 14,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {topicDeadline ? `Дедлайн: ${topicDeadline}` : 'Дедлайн не установлен'}
             </Typography>
           </Toolbar>
         </AppBar>
 
         <Box sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <Button
               variant="contained"
               onClick={() => setIsDialogOpen(true)}
@@ -175,11 +216,28 @@ export default function TasksPage() {
           </Box>
 
           <TaskBoard
-            tasks={filteredTasks}
+            tasks={tasks}
             onStatusChange={moveTaskToStatus}
             onTaskUpdate={updateTask}
             addSubtask={addSubtask}
           />
+
+          {/* Кнопка ИИ-ассистента */}
+          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-start' }}>
+            <Button
+              variant="contained"
+              onClick={handleUseAiAssistant}
+              disabled={isAiLoading}
+              sx={{
+                backgroundColor: '#14353b',
+                color: '#288394',
+                fontFamily: '"Poppins", XI20',
+                mt: 2,
+              }}
+            >
+              {isAiLoading ? 'Генерация...' : 'Использовать ИИ-ассистента'}
+            </Button>
+          </Box>
 
           {numericTopicId !== undefined && (
             <CreateTaskDialog

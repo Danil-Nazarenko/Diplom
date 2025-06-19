@@ -12,6 +12,11 @@ export const getTopics = async (): Promise<Topic[]> => {
   return response.data;
 };
 
+export const getTopicById = async (id: number): Promise<Topic> => {
+  const response = await api.get<Topic>(`/Topics/${id}`);
+  return response.data;
+};
+
 export const createTopic = async (title: string, deadline?: string): Promise<Topic> => {
   const payload: { title: string; deadline?: string } = { title };
   if (deadline) {
